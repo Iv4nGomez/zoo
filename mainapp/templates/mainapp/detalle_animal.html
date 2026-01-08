@@ -19,6 +19,7 @@ Detalles
         {% endif %}
         <p><strong>Recinto:</strong> {{animal.recinto}}</p>
         <p><strong>Especie:</strong> {{animal.especie}}</p>
+        <p>Número de vacunas puestas: {{num_vacunas}}</p>
         <a href="{% url 'ver_animales' %}"
             class="inline-block mt-4 text-blue-600 hover:text-blue-800 font-semibold">&larr; Volver a la lista</a>
     </div>

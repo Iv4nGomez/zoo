@@ -42,10 +42,18 @@ class ver_veterinarios(LoginRequiredMixin, ListView):
     template_name = 'mainapp/ver_veterinarios.html'
     context_object_name = 'veterinarios'
 
+
 class detalle_aniamles(DetailView):
     model = Animal
     template_name = 'mainapp/detalle_animal.html'
     context_object_name = 'animal'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        num_vacunas = Animal.objects.annotate(Count('vacunasPuestas'))
+        print(num_vacunas.values()[0]['vacunasPuestas__count'])
+        context['num_vacunas'] = num_vacunas.values()[0]['vacunasPuestas__count']
+        return context
 
 class detalle_veterinario(UserPassesTestMixin,DetailView):
     model = Veterinario
@@ -54,6 +62,11 @@ class detalle_veterinario(UserPassesTestMixin,DetailView):
 
     def test_func(self):
         return self.request.user.is_staff
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['num_consultas'] = Veterinario.objects.aggregate(Count('consultas'))['consultas__count']
+        return context
     
 class editar_animal(UpdateView):
     model = Animal

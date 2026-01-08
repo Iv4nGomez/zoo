@@ -16,6 +16,7 @@ Detalles
         {% else %}
         <img src="{% static 'img/avatar_default.jpg' %}" alt="Imagen default de un avatar">
         {% endif %}
+        <p>Número de consultas realizadas: {{num_consultas}}</p>
         <a href="{% url 'ver_veterinarios' %}"
             class="inline-block mt-4 text-green-600 hover:text-green-800 font-semibold">&larr; Volver a la lista</a>
     </div>
