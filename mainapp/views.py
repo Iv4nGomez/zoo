@@ -6,7 +6,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, AccessMixin
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.http import HttpResponseForbidden
-from django.db.models import Count
+from django.db.models import Count, Sum
 
 class soloAdmins(AccessMixin):
     def dispatch(self, request, *args, **kwargs):
@@ -93,8 +93,9 @@ class crear_veterinario(CreateView):
 @login_required
 def ver_vacunas_animal(request, animal_pk):
     anotacion = Animal.objects.annotate(numero_vacunas=Count('vacunasPuestas'))
+    agregacion = Animal.objects.aggregate(numero_vacunas=Count('vacunasPuestas'))
     animal = get_object_or_404(anotacion, pk=animal_pk)
-    return render(request, 'mainapp/ver_vacunas_animal.html', {'animal':animal})
+    return render(request, 'mainapp/ver_vacunas_animal.html', {'animal':animal, 'num_vacunas':agregacion['numero_vacunas']})
 
 
 def crear_vacunas_animal(request, animal_pk):
