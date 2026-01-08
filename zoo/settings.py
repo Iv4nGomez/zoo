@@ -75,7 +75,7 @@ WSGI_APPLICATION = 'zoo.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'django_mysql',
         'USER': 'usuario',
         'PASSWORD': 'usuario1234',
