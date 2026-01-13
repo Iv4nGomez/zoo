@@ -58,7 +58,7 @@
 {% endif %}
 
 <h2 class="text-2xl font-semibold text-gray-700 mb-4 mt-8">Veterinarios</h2>
-{% if veterinarios %}
+{% if veterinarios and user %}
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for veterinario in veterinarios %}
     <div

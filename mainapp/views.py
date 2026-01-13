@@ -7,21 +7,22 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.http import HttpResponseForbidden
 from django.db.models import Count, Sum
+from django.contrib.auth.models import User, Group
 
-class soloAdmins(AccessMixin):
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated or not request.user.is_staff:
-            return self.handle_no_permission()
-        return super().dispatch(request, *args, **kwargs)
+# class soloAdmins(AccessMixin):
+#     def dispatch(self, request, *args, **kwargs):
+#         if not request.user.is_authenticated or not request.user.is_staff:
+#             return self.handle_no_permission()
+#         return super().dispatch(request, *args, **kwargs)
 
-def solo_usuarios_premium(function_view):
-    def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated or not request.user.is_staff:
-            return HttpResponseForbidden("Acceso denegado")
-        return view_func(request, *args, **kwargs)
-    return _wrapped_view
+# def solo_usuarios_premium(function_view):
+#     def _wrapped_view(request, *args, **kwargs):
+#         if not request.user.is_authenticated or not request.user.is_staff:
+#             return HttpResponseForbidden("Acceso denegado")
+#         return view_func(request, *args, **kwargs)
+#     return _wrapped_view
 
-class ver_animales_veterinarios(soloAdmins,ListView):
+class ver_animales_veterinarios(ListView):
     model = Animal
     template_name = 'mainapp/inicio.html'
     context_object_name = 'animales'
@@ -37,10 +38,12 @@ class ver_animales(PermissionRequiredMixin, ListView):
     context_object_name = 'animales'
     permission_required = 'mainapp.view_animal'
 
-class ver_veterinarios(LoginRequiredMixin, ListView):
+
+class ver_veterinarios(PermissionRequiredMixin, ListView):
     model = Veterinario
     template_name = 'mainapp/ver_veterinarios.html'
     context_object_name = 'veterinarios'
+    permission_required = 'mainapp.view_veterinario'
 
 
 class detalle_aniamles(DetailView):
@@ -50,9 +53,11 @@ class detalle_aniamles(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        print(context)
         num_vacunas = Animal.objects.annotate(Count('vacunasPuestas'))
         print(num_vacunas.values()[0]['vacunasPuestas__count'])
         context['num_vacunas'] = num_vacunas.values()[0]['vacunasPuestas__count']
+        print(context)
         return context
 
 class detalle_veterinario(UserPassesTestMixin,DetailView):
@@ -91,17 +96,37 @@ class editar_veterinario(UpdateView):
     template_name = 'mainapp/editar_veterinario.html'
     success_url = reverse_lazy('inicio')
     form_class = VeterinarioForm
+    
 
 class eliminar_veterinario(DeleteView):
     model = Veterinario
     template_name = 'mainapp/eliminar_veterinario.html'
     success_url = reverse_lazy('inicio')
 
-class crear_veterinario(CreateView):
-    model = Veterinario
-    template_name = 'mainapp/editar_veterinario.html'
-    success_url = reverse_lazy('inicio')
-    form_class = VeterinarioForm
+# class crear_veterinario(CreateView):
+#     model = Veterinario
+#     template_name = 'mainapp/editar_veterinario.html'
+#     success_url = reverse_lazy('inicio')
+#     form_class = VeterinarioForm
+
+def crear_veterinario(request):
+
+    if request.method == 'POST':
+        form = VeterinarioForm(request.POST)
+        
+        if form.is_valid():
+            nuevo_veterinario = form.save(commit=False)
+            nuevo_veterinario.save()
+            usuario = User.objects.create_user(f'{form.cleaned_data['nombre']}', f'{form.cleaned_data['nombre']}@veterinarios.es', f'{form.cleaned_data['nombre']}1234' )
+            grupo_veterinario = Group.objects.get(name='Veterinario')
+            usuario.groups.add(grupo_veterinario)
+            print(usuario.groups)
+
+            return redirect('ver_veterinarios')
+            
+    else:
+        form = VeterinarioForm()
+    return render(request, 'mainapp/editar_consulta.html', {'form': form})
 
 @login_required
 def ver_vacunas_animal(request, animal_pk):
@@ -160,10 +185,11 @@ def eliminar_vacunas_animal(request, animal_pk, pk):
     return render(request, 'mainapp/eliminar_vacunas_animal.html', {'vacuna':vacunaAnimal})
 
 
-class verCnsultas(DetailView):
+class verCnsultas(PermissionRequiredMixin,DetailView):
     model = Veterinario
     template_name = 'mainapp/ver_consultas.html'
     context_object_name = 'veterinario'
+    permission_required = 'mainapp.view_consulta'
 
 @permission_required('mainapp.create_consulta')
 def crear_consulta(request, pk):
@@ -212,3 +238,8 @@ def eliminar_consulta(request, pk_veterinario, pk):
         return redirect('ver_consultas', pk=pk_veterinario)
        
     return render(request, 'mainapp/eliminar_consulta.html')
+
+def estadisticas(request):
+    num_consultas = Veterinario.objects.aggregate(Count('consultas'))['consultas__count']
+    num_vacunas = Animal.objects.aaggregate(Count('nombre'))
+    return render(request, 'mainapp/estadisticas.html', {'num_consultas':num_consultas, 'num_vacunas':num_vacunas})

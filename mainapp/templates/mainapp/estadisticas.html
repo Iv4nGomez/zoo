@@ -1,0 +1,12 @@
+{% extends 'mainapp/base.html' %}
+
+{% block titulo_barra %}Estadistícas{% endblock %}
+{% block titulo_seccion %}Estadistícas{% endblock %}
+
+{% block contenido %}
+<ul>
+    <li>Consultas toteles realizadas en el Zoo: {{num_consultas}}</li>
+    <li>Vacunas totales puesta a animales: {{num_vacunas}}</li>
+</ul>
+
+{% endblock %}

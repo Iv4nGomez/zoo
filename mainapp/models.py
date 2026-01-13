@@ -2,7 +2,6 @@ from django.db import models
 from django.core.exceptions import ValidationError
 import datetime
 from django.utils import timezone
-
 # Validadores
 
 def mayor_de_edad(value):
@@ -27,6 +26,7 @@ class Animal(models.Model):
     recinto = models.ForeignKey('Recinto', on_delete=models.SET_NULL, null=True, related_name='animales')
     especie = models.ForeignKey('Especie', on_delete=models.SET_NULL, null=True, related_name='animales')
     foto = models.ImageField(upload_to='imagenes/animales/', null=True, blank=True)
+    
     def __str__(self):
         return f"{self.nombre}"
 

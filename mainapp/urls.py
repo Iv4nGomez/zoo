@@ -17,7 +17,7 @@ urlpatterns = [
 
     path('editar_veterinario/<int:pk>', editar_veterinario.as_view(), name='editar_veterinario'),
     path('eliminar_veterinario/<int:pk>', eliminar_veterinario.as_view(), name='eliminar_veterinario'),
-    path('crear_veterinario', crear_veterinario.as_view(), name='crear_veterinario'),
+    path('crear_veterinario', crear_veterinario, name='crear_veterinario'),
 
     path('animal/<int:animal_pk>/ver_vacunas/', ver_vacunas_animal  , name='ver_vacunas'),
     path('animal/<int:animal_pk>/crear_vacunas_animal', crear_vacunas_animal, name='crear_vacunas_animal'),
@@ -28,6 +28,8 @@ urlpatterns = [
     path('<int:pk>/consulta/crear', crear_consulta, name='crear_consulta'),
     path('<int:pk_veterinario>/consulta/editar/<int:pk>', editar_consulta, name='editar_consulta'),
     path('<int:pk_veterinario>/consulta/eliminar/<int:pk>', eliminar_consulta, name='eliminar_consulta'),
+
+    path('estadisticas/', estadisticas, name='estadisticas')
 
 
 ]
