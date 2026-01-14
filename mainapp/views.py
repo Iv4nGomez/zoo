@@ -6,7 +6,8 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, AccessMixin
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.http import HttpResponseForbidden
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Avg
+from django.db.models.functions import ExtractYear, Now
 from django.contrib.auth.models import User, Group
 
 # class soloAdmins(AccessMixin):
@@ -239,7 +240,14 @@ def eliminar_consulta(request, pk_veterinario, pk):
        
     return render(request, 'mainapp/eliminar_consulta.html')
 
+
 def estadisticas(request):
     num_consultas = Veterinario.objects.aggregate(Count('consultas'))['consultas__count']
-    num_vacunas = Animal.objects.aaggregate(Count('nombre'))
-    return render(request, 'mainapp/estadisticas.html', {'num_consultas':num_consultas, 'num_vacunas':num_vacunas})
+    num_vacunas = Animal.objects.aggregate(Count('nombre'))['nombre__count']
+    num_veterinarios = Veterinario.objects.aggregate(Count('nombre'))['nombre__count']
+    num_animales = Animal.objects.aggregate(Count('nombre'))['nombre__count']
+    edad_media_veterinarios = Veterinario.objects.annotate(edad = ExtractYear(Now()) - ExtractYear('fecha_nac')).aggregate(Avg('edad'))['edad__avg']
+    # print(anotacion.values())
+
+  
+    return render(request, 'mainapp/estadisticas.html', {'num_consultas':num_consultas, 'num_vacunas':num_vacunas, 'num_veterinarios':num_veterinarios, 'num_animales':num_animales, 'edad_media_veterinarios':round(edad_media_veterinarios, 2)})
